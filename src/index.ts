@@ -2,6 +2,7 @@ import express from 'express'
 import dotenv from 'dotenv'
 import cors from 'cors'
 import morgan from 'morgan'
+import sequelize from './config/db'
 
 dotenv.config()
 
@@ -19,3 +20,11 @@ app.get('/api', (_, res) => {
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}/api`)
 })
+
+sequelize.authenticate()
+  .then(() => {
+    console.log('Database connected successfully')
+  })
+  .catch((err) => {
+    console.error('Database connection failed:', err)
+  })
