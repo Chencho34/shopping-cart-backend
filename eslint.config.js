@@ -14,12 +14,12 @@ export default [
       '@typescript-eslint': eslintPluginTs
     },
     rules: {
-      'quotes': ['error', 'single'],
+      quotes: ['error', 'single'],
       'jsx-quotes': ['error', 'prefer-single'],
-      'semi': ['error', 'never'],
+      semi: ['error', 'never'],
       'space-before-function-paren': ['error', 'always'],
       'comma-dangle': ['error', 'never'],
-      'eol-last': ['error', 'always'],
+      'eol-last': ['error', 'always']
 
     }
   }
