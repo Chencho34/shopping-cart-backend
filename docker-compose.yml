@@ -1,0 +1,44 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:17-alpine
+    restart: always
+    container_name: postgres_db
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "${DB_PORT}:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - backend_network
+  
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: backend_service
+    environment:
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      PORT: ${PORT}
+      CHOKIDAR_USEPOLLING: true
+    ports:
+      - "${PORT}:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      - db
+    command: npm run dev
+    networks:
+      - backend_network
+volumes:
+  db_data:
+networks:
+  backend_network:
