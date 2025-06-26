@@ -21,8 +21,12 @@ app.get('/api', (_, res) => {
 
 app.use('/api', userRoutes)
 
-sequelize.sync({ alter: true })
-.then(() => {
+sequelize.authenticate()
+  .then(() => {
+    console.log('Database connected')
+    // sequelize.sync()
+  })
+  .then(() => {
     app.listen(PORT, () => {
       console.log(`Server is running on http://localhost:${PORT}/api`)
     })

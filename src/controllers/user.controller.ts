@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import { CreateUserDto } from '../dtos/user.dto'
+import { CreateUserDto, LoginUserDto } from '../dtos/user.dto'
 import { UserService } from '../services/user.service'
 
 export class UserController {
@@ -13,6 +13,17 @@ export class UserController {
     }
   }
 
+  static async login (req: Request, res: Response) {
+    try {
+      const data: LoginUserDto = req.body
+      const result = await UserService.login(data)
+      if (!result) return res.status(401).json({ error: 'Invalid credentials' })
+      return res.json(result)
+    } catch (err: any) {
+      return res.status(400).json({ error: err.message })
+    }
+  }
+
   static async getAllUsers (_req: Request, res: Response) {
     try {
       const users = await UserService.getAllUsers()
@@ -21,4 +32,15 @@ export class UserController {
       res.status(500).json({ error: err.message })
     }
   } 
+
+  static async getById ( req: Request, res: Response) {
+    try {
+      const userId = parseInt(req.params.id)
+      const user = await UserService.getUserById(userId)
+      if (!user) res.status(404).json({ error: 'User not found' })
+      res.status(200).json(user)
+    } catch (err: any) {
+      res.status(500).json({ error: err.message })
+    }
+  }
 }
