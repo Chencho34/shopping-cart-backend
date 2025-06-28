@@ -1,12 +1,14 @@
 import { Request, Response } from 'express'
 import { CreateUserDto, LoginUserDto } from '../dtos/user.dto'
 import { UserService } from '../services/user.service'
+import bcrypt from 'bcryptjs'
 
 export class UserController {
   static async register (req: Request, res: Response) {
     try {
-      const data: CreateUserDto = req.body
-      const user = await UserService.createUser(data)
+      const userData: CreateUserDto = req.body
+      const hashed = await bcrypt.hash(userData.password, 10)
+      const user = await UserService.createUser({ ...userData, password: hashed })
       res.status(201).json({ message: 'User created successfully', user })
     } catch (err: any) {
       res.status(400).json({ error: err })
@@ -17,10 +19,12 @@ export class UserController {
     try {
       const data: LoginUserDto = req.body
       const result = await UserService.login(data)
-      if (!result) return res.status(401).json({ error: 'Invalid credentials' })
-      return res.json(result)
+      if (!result) {
+        res.status(401).json({ error: 'Invalid credentials controller' })
+      }
+      res.json(result)
     } catch (err: any) {
-      return res.status(400).json({ error: err.message })
+      res.status(400).json({ error: err.message })
     }
   }
 

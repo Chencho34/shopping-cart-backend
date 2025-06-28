@@ -5,10 +5,7 @@ import jwt from 'jsonwebtoken'
 
 export class UserService {
   static async createUser (userData: CreateUserDto) {
-    // const hashedPassword = await bcrypt.hash(userData.password, 10)
-    // const user = await User.create({ ...userData, password: hashedPassword })
-
-    const user = await User.create({ ...userData })
+    const user = await User.create(userData)
     return user
   }
 
@@ -40,8 +37,15 @@ export class UserService {
       throw new Error('User not found')
     }
     const isMatch = await bcrypt.compare(data.password, user.password)
+    
+    // const valid = data.password === user.password
+
+    // if (!valid) {
+    //   throw new Error('Invalid credentials')
+    // }
+
     if (!isMatch) {
-      throw new Error('Invalid credentials')
+      throw new Error('Invalid credentials services')
     }
     const token = jwt.sign(
       { id: user.id, email: user.email },
