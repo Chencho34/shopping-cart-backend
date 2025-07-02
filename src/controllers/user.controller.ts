@@ -1,34 +1,15 @@
 import { Request, Response } from 'express'
 import { CreateUserDto, LoginUserDto } from '../dtos/user.dto'
 import { UserService } from '../services/user.service'
-import bcrypt from 'bcryptjs'
-import User from '../models/user.model'
-import { Op } from 'sequelize'
 
 export class UserController {
   static async register (req: Request, res: Response) {
     try {
       const userData: CreateUserDto = req.body
-      const exists = await User.findOne({
-        where: {
-          [Op.or]: [{email: userData.email}, {username: userData.username}]
-        }
-      })
-
-      if (exists) {
-        const conflictField = exists.email === userData.email ? 'email' : 'username'
-        res.status(409).json({
-          message: `${conflictField} in used`,
-          errorCode: `${conflictField.toUpperCase()}_EXISTS`
-        })
-        return
-      } 
-        
-      const hashed = await bcrypt.hash(userData.password, 10)
-      const user = await UserService.createUser({ ...userData, password: hashed })
-      res.status(201).json({ message: 'User created successfully', user })
-    } catch (err: any) {
-      res.status(400).json({ error: err })
+      const user = await UserService.createUser(userData)
+      return res.status(201).json({ message: 'User created successfully', user })
+    } catch (error: any) {
+      return res.status(400).json(error)
     }
   }
 

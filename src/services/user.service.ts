@@ -1,3 +1,4 @@
+import { Op } from 'sequelize'
 import { CreateUserDto, LoginUserDto, UpdateUserDto } from '../dtos/user.dto'
 import User from '../models/user.model'
 import bcrypt from 'bcryptjs'
@@ -5,7 +6,22 @@ import jwt from 'jsonwebtoken'
 
 export class UserService {
   static async createUser (userData: CreateUserDto): Promise<User> {
-    const user = await User.create(userData)
+    const existsUser = await User.findOne({
+      where: {
+        [Op.or]: [{ username: userData.username }, { email: userData.email }]
+      }
+    })
+
+    if (existsUser) {
+      const conflictField = existsUser.email === userData.email ? 'email' : 'username'
+      const error: any = new Error(`El ${conflictField} ya está en uso`)
+      error.code = `${conflictField.toUpperCase()}_EXISTS`
+      error.status = 409
+      throw error
+    }
+            
+    const hashed = await bcrypt.hash(userData.password, 10)
+    const user = await User.create({ ...userData, password: hashed })
     return user
   }
 
