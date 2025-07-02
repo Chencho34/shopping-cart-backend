@@ -4,7 +4,7 @@ import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 
 export class UserService {
-  static async createUser (userData: CreateUserDto) {
+  static async createUser (userData: CreateUserDto): Promise<User> {
     const user = await User.create(userData)
     return user
   }

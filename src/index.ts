@@ -25,6 +25,7 @@ sequelize.authenticate()
   .then(() => {
     console.log('Database connected')
     // sequelize.sync()
+    // sequelize.drop()
   })
   .then(() => {
     app.listen(PORT, () => {
@@ -34,3 +35,5 @@ sequelize.authenticate()
   .catch((err) => {
     console.error('Database connection failed:', err)
   })
+
+

@@ -2,5 +2,8 @@
     "editor.formatOnSave": false,
     "files.autoSave": "off",
     "editor.defaultFormatter": null,
-    "editor.tabSize": 2
+    "editor.tabSize": 2,
+    "[typescript]": {
+        "editor.defaultFormatter": "vscode.typescript-language-features"
+    }
 }
