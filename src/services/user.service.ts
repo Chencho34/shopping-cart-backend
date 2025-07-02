@@ -26,8 +26,7 @@ export class UserService {
   }
 
   static async getAllUsers (): Promise<User[]> {
-    return await User.findAll()
-    // return await User.findAll({ attributes: { exclude: ['password'] } })
+    return await User.findAll({ attributes: { exclude: ['password'] } })
   }
 
   static async getUserById (id: number): Promise<User | null> {
@@ -43,7 +42,7 @@ export class UserService {
     return User.findByPk(id, { attributes: { exclude: ['password'] } }) 
   }
 
-  static deleteUser (id: number) {
+  static deleteUser (id: number): Promise<number> {
     return User.destroy({ where: { id }})
   }
 

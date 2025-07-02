@@ -9,5 +9,6 @@ router.post('/users/register', validate(userSchema), UserController.register)
 router.post('/users/login', UserController.login)
 router.get('/users', UserController.getAllUsers)
 router.get('/users/:id', UserController.getById)
+router.delete('/users/:id', UserController.deleteById)
 
 export default router
