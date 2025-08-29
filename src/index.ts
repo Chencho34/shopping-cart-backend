@@ -21,11 +21,24 @@ app.get('/api', (_, res) => {
 
 app.use('/api', userRoutes)
 
-sequelize.authenticate()
+// sequelize.authenticate()
+//   .then(() => {
+//     console.log('Database connected')
+//     sequelize.sync({force: false}) // Set to true to drop and recreate tables
+//     // sequelize.drop() // Uncomment to drop the database tables
+//     app.listen(PORT, () => {
+//       console.log(`Server is running on http://localhost:${PORT}/api`)
+//     })
+//   })
+//   .catch((err) => {
+//     console.error('Database connection failed:', err)
+//   })
+
+
+  sequelize.authenticate()
   .then(() => {
     console.log('Database connected')
-    // sequelize.sync()
-    // sequelize.drop()
+    return sequelize.sync({ force: false })
   })
   .then(() => {
     app.listen(PORT, () => {
@@ -34,6 +47,9 @@ sequelize.authenticate()
   })
   .catch((err) => {
     console.error('Database connection failed:', err)
+    // Reintentar después de 5 segundos
+    setTimeout(() => {
+      console.log('Retrying database connection...')
+      process.exit(1)
+    }, 5000)
   })
-
-
