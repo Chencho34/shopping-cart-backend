@@ -4,6 +4,7 @@ import cors from 'cors'
 import morgan from 'morgan'
 import sequelize from './config/db'
 import userRoutes from './routes/user.routes'
+import productRoutes from './routes/products.routes'
 
 dotenv.config()
 
@@ -20,6 +21,7 @@ app.get('/api', (_, res) => {
 
 
 app.use('/api', userRoutes)
+app.use('/api', productRoutes)
 
 // sequelize.authenticate()
 //   .then(() => {
