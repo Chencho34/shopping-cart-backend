@@ -24,8 +24,8 @@ app.use('/api', userRoutes)
 // sequelize.authenticate()
 //   .then(() => {
 //     console.log('Database connected')
-//     sequelize.sync({force: false}) // Set to true to drop and recreate tables
-//     // sequelize.drop() // Uncomment to drop the database tables
+//     sequelize.sync() // Set to true to drop and recreate tables
+//     sequelize.drop() // Uncomment to drop the database tables
 //     app.listen(PORT, () => {
 //       console.log(`Server is running on http://localhost:${PORT}/api`)
 //     })
@@ -33,7 +33,6 @@ app.use('/api', userRoutes)
 //   .catch((err) => {
 //     console.error('Database connection failed:', err)
 //   })
-
 
   sequelize.authenticate()
   .then(() => {

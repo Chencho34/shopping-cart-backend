@@ -6,17 +6,19 @@ interface UserAttributes {
   username: string
   email: string
   password: string
+  role: 'user' | 'admin'
   createdAt?: Date
   updatedAt?: Date
 }
 
-interface UserCreationAttributes extends Optional<UserAttributes, 'id'> {}
+interface UserCreationAttributes extends Optional<UserAttributes, 'id' | 'role'> {}
 
 export default class User extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes {
   id!: number
   username!: string
   email!: string
   password!: string
+  role!: 'user' | 'admin'
   createdAt!: Date
   updatedAt!: Date
 }
@@ -41,6 +43,11 @@ User.init(
     password: {
       type: DataTypes.STRING,
       allowNull: false
+    },
+    role: {
+      type: DataTypes.ENUM('user', 'admin'),
+      allowNull: false,
+      defaultValue: 'user'
     }
   },
   {
