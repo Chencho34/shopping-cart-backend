@@ -5,6 +5,7 @@ import morgan from 'morgan'
 import sequelize from './config/db'
 import userRoutes from './routes/user.routes'
 import productRoutes from './routes/products.routes'
+import { errorHandler } from './middlewares/errorHandler'
 
 dotenv.config()
 
@@ -19,9 +20,9 @@ app.get('/api', (_, res) => {
   res.send('Hello world!')
 })
 
-
 app.use('/api', userRoutes)
 app.use('/api', productRoutes)
+app.use(errorHandler)
 
 // sequelize.authenticate()
 //   .then(() => {
