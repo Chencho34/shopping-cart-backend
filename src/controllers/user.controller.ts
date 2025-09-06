@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import { UserService } from '../services/user.service'
-import { catchAsync } from '../utils'
+import { AppError, catchAsync } from '../utils'
 
 export class UserController {
 
@@ -12,14 +12,14 @@ export class UserController {
   static getById = catchAsync(async (req: Request, res: Response) => {
     const userId = parseInt(req.params.id)
     const user = await UserService.getUserById(userId)
-    if (!user) res.status(404).json({ error: 'User not found' })
+    if (!user) throw new AppError('User not found', 404)
     return res.status(200).json(user)
   })
 
   static deleteById = catchAsync(async (req: Request, res: Response) => {
     const userId = parseInt(req.params.id)
     const user = await UserService.deleteUser(userId)
-    if (!user) return res.status(404).json({ error: 'User not found' })
+    if (!user) throw new AppError('User not foud', 404)
     return res.status(200).json({ error: 'User was delete' })
   })
 }
