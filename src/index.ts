@@ -6,6 +6,7 @@ import sequelize from './config/db'
 import userRoutes from './routes/user.routes'
 import productRoutes from './routes/products.routes'
 import authRoutes from './routes/auth.routes'
+import cartRoutes from './routes/cart.routes'
 import { errorHandler } from './middlewares/errorHandler'
 
 dotenv.config()
@@ -24,6 +25,7 @@ app.get('/api', (_, res) => {
 app.use('/api', authRoutes)
 app.use('/api', userRoutes)
 app.use('/api', productRoutes)
+app.use('/api', cartRoutes)
 app.use(errorHandler)
 
 // sequelize.authenticate()
