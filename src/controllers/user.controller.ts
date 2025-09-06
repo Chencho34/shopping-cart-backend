@@ -1,59 +1,25 @@
 import { Request, Response } from 'express'
-import { CreateUserDto, LoginUserDto } from '../dtos/user.dto'
 import { UserService } from '../services/user.service'
+import { AppError, catchAsync } from '../utils'
 
 export class UserController {
-  static async register (req: Request, res: Response) {
-    try {
-      const userData: CreateUserDto = req.body
-      const user = await UserService.createUser(userData)
-      return res.status(201).json({ message: 'User created successfully', user })
-    } catch (error: any) {
-      return res.status(400).json(error)
-    }
-  }
 
-  static async login (req: Request, res: Response) {
-    try {
-      const data: LoginUserDto = req.body
-      const result = await UserService.login(data)
-      if (!result) {
-        res.status(401).json({ error: 'Invalid credentials controller' })
-      }
-      res.json(result)
-    } catch (err: any) {
-      res.status(400).json({ error: err.message })
-    }
-  }
+  static getAll = catchAsync(async (_req: Request, res: Response) => {
+    const users = await UserService.getAllUsers()
+    return res.status(200).json(users)
+  }) 
 
-  static async getAllUsers (_req: Request, res: Response) {
-    try {
-      const users = await UserService.getAllUsers()
-      res.status(200).json(users)
-    } catch (err: any) {
-      res.status(500).json({ error: err.message })
-    }
-  } 
+  static getById = catchAsync(async (req: Request, res: Response) => {
+    const userId = parseInt(req.params.id)
+    const user = await UserService.getUserById(userId)
+    if (!user) throw new AppError('User not found', 404)
+    return res.status(200).json(user)
+  })
 
-  static async getById ( req: Request, res: Response) {
-    try {
-      const userId = parseInt(req.params.id)
-      const user = await UserService.getUserById(userId)
-      if (!user) res.status(404).json({ error: 'User not found' })
-      res.status(200).json(user)
-    } catch (err: any) {
-      res.status(500).json({ error: err.message })
-    }
-  }
-
-  static async deleteById (req: Request, res: Response) {
-    try {
-      const userId = parseInt(req.params.id)
-      const user = await UserService.deleteUser(userId)
-      if (!user) return res.status(404).json({ error: 'User not found' })
-      return res.status(200).json({ error: 'User was delete' })
-    } catch (error) {
-      return res.status(500).json({ error })
-    }
-  }
+  static deleteById = catchAsync(async (req: Request, res: Response) => {
+    const userId = parseInt(req.params.id)
+    const user = await UserService.deleteUser(userId)
+    if (!user) throw new AppError('User not foud', 404)
+    return res.status(200).json({ error: 'User was delete' })
+  })
 }
