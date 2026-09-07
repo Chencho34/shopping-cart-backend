@@ -6,36 +6,30 @@ import jwt from 'jsonwebtoken'
 import { AppError } from '../utils'
 
 export class AuthService {
-   static async signup (userData: CreateUserDto): Promise<User> {
-    try {
-      const existsUser = await User.findOne({
-        where: {
-          [Op.or]: [{ username: userData.username }, { email: userData.email }]
-        }
-      })
-  
-      if (existsUser) {
-        const conflictField = existsUser.email === userData.email ? 'email' : 'username'
-        const err: any = `El ${conflictField} ya está en uso`
-        throw new AppError(err, 409)
+  static async signup (userData: CreateUserDto): Promise<User> {
+    const existsUser = await User.findOne({
+      where: {
+        [Op.or]: [{ username: userData.username }, { email: userData.email }]
       }
-      const hashed = await bcrypt.hash(userData.password, 10)
-      const user = await User.create({ ...userData, password: hashed })
-      return user
-      
-    } catch (error) {
-      console.log(error)
-      throw error
+    })
+
+    if (existsUser) {
+      const conflictField =
+        existsUser.email === userData.email ? 'email' : 'username'
+      throw new AppError(`El ${conflictField} ya está en uso`, 409)
     }
+    const hashed = await bcrypt.hash(userData.password, 10)
+    const user = await User.create({ ...userData, password: hashed })
+    return user
   }
 
   static async login (data: LoginUserDto) {
-    const user = await User.findOne({ where: { email: data.email}})
+    const user = await User.findOne({ where: { email: data.email } })
     if (!user) {
       throw new Error('User not found')
     }
     const isMatch = await bcrypt.compare(data.password, user.password)
-    
+
     // const valid = data.password === user.password
 
     // if (!valid) {
