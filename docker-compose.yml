@@ -27,6 +27,7 @@ services:
       DB_HOST: ${DB_HOST}
       DB_PORT: ${DB_PORT}
       PORT: ${PORT}
+      JWT_SECRET: ${JWT_SECRET}
       CHOKIDAR_USEPOLLING: true
     ports:
       - "${PORT}:3000"
