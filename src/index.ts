@@ -1,5 +1,5 @@
+import 'dotenv/config'
 import express from 'express'
-import dotenv from 'dotenv'
 import cors from 'cors'
 import morgan from 'morgan'
 import sequelize from './config/db'
@@ -8,8 +8,6 @@ import productRoutes from './routes/products.routes'
 import authRoutes from './routes/auth.routes'
 import cartRoutes from './routes/cart.routes'
 import { errorHandler } from './middlewares/errorHandler'
-
-dotenv.config()
 
 const app = express()
 app.use(cors())
@@ -26,22 +24,11 @@ app.use('/api', authRoutes)
 app.use('/api', userRoutes)
 app.use('/api', productRoutes)
 app.use('/api', cartRoutes)
+
 app.use(errorHandler)
 
-// sequelize.authenticate()
-//   .then(() => {
-//     console.log('Database connected')
-//     sequelize.sync() // Set to true to drop and recreate tables
-//     sequelize.drop() // Uncomment to drop the database tables
-//     app.listen(PORT, () => {
-//       console.log(`Server is running on http://localhost:${PORT}/api`)
-//     })
-//   })
-//   .catch((err) => {
-//     console.error('Database connection failed:', err)
-//   })
 
-  sequelize.authenticate()
+sequelize.authenticate()
   .then(() => {
     console.log('Database connected')
     return sequelize.sync({ force: false })
@@ -53,7 +40,6 @@ app.use(errorHandler)
   })
   .catch((err) => {
     console.error('Database connection failed:', err)
-    // Reintentar después de 5 segundos
     setTimeout(() => {
       console.log('Retrying database connection...')
       process.exit(1)
