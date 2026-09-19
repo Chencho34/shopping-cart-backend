@@ -18,6 +18,7 @@ export const validate = (schema: Joi.ObjectSchema) => {
       }))
 
       res.status(400).json({
+        success: false,
         message: 'Invalid request data',
         error: errorMessages
       })
