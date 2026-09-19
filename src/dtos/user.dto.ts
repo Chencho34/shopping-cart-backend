@@ -1,3 +1,5 @@
+type Role = 'admin' | 'user'
+
 export interface CreateUserDto {
   username: string
   email: string
@@ -13,4 +15,16 @@ export interface UpdateUserDto {
 export interface LoginUserDto {
   email: string
   password: string
+}
+
+export interface AuthUserDto {
+  id: number
+  username: string
+  email: string
+  role: Role
+}
+
+export interface AuthResponseDto {
+  token: string
+  user: AuthUserDto
 }

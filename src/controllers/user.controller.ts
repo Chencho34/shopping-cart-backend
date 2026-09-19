@@ -18,8 +18,17 @@ export class UserController {
 
   static deleteById = catchAsync(async (req: Request, res: Response) => {
     const userId = parseInt(req.params.id)
-    const user = await UserService.deleteUser(userId)
-    if (!user) throw new AppError('User not foud', 404)
-    return res.status(200).json({ error: 'User was delete' })
+      const user = await UserService.deleteUser(userId)
+      if (!user) throw new AppError('User not foud', 404)
+      return res.status(200).json({ error: 'User was delete' })
+    })
+
+  // Todo : implement update user controller
+  static update = catchAsync(async (req: Request, res: Response) => {
+    const userId = parseInt(req.params.id)
+    const userData = req.body
+    const updatedUser = await UserService.updateUser(userId, userData)
+    if (!updatedUser) throw new AppError('User not found', 404)
+    return res.status(200).json(updatedUser)
   })
 }
