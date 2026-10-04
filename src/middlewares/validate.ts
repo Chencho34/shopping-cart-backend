@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express'
 import Joi from 'joi'
+import { AppError } from '../utils'
 
 const validationOptions: Joi.BaseValidationOptions = {
   abortEarly: false,
@@ -8,8 +9,8 @@ const validationOptions: Joi.BaseValidationOptions = {
 }
 
 export const validate = (schema: Joi.ObjectSchema) => {
-  return (req: Request, res: Response, next: NextFunction): void => {
-    const { error } = schema.validate(req.body, validationOptions)
+  return (req: Request, _res: Response, next: NextFunction): void => {
+    const { error, value } = schema.validate(req.body, validationOptions)
     
     if (error) {
       const errorMessages = error.details.map((detail) => ({
@@ -17,13 +18,12 @@ export const validate = (schema: Joi.ObjectSchema) => {
         message: detail.message
       }))
 
-      res.status(400).json({
-        success: false,
-        message: 'Invalid request data',
-        error: errorMessages
-      })
+      next(new AppError('Invalid request data', 400, 'VALIDATION_ERROR', errorMessages))
+      
       return
     }
+
+    req.body = value
     next()
   }
 }

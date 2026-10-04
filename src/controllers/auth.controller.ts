@@ -1,16 +1,11 @@
 import { Request, Response } from 'express'
-
-import { CreateUserDto, LoginUserDto } from '../dtos/user.dto'
-
 import { AuthService } from '../services/auth.service'
-import { generateAccessToken } from '../services/token.service'
-
+import { generateAccessToken, generateRefreshToken } from '../services/token.service'
 import { catchAsync } from '../utils'
 
 export class AuthController {  
   static signup = catchAsync(async (req: Request, res: Response) => {
-    const userData: CreateUserDto = req.body
-    const user = await AuthService.signup(userData)
+    const user = await AuthService.signup(req.body)
 
     return res.status(201).json({
       success: true,
@@ -20,9 +15,16 @@ export class AuthController {
   })
 
   static login = catchAsync(async (req: Request, res: Response) => {
-    const data: LoginUserDto = req.body
-    const user = await AuthService.login(data)    
-    const token = generateAccessToken(user, res)
+    const user = await AuthService.login(req.body)    
+    const token = generateAccessToken(user)
+    const refreshToken = generateRefreshToken(user, token)
+
+    res.cookie('jwt', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: (1000 * 60 * 60 * 24) * 7
+    })
 
     return res.status(200).json({
       success: true,
@@ -35,12 +37,27 @@ export class AuthController {
   })
 
   static logout = catchAsync(async (_req: Request, res: Response) => {
-    res.clearCookie('token')
+    res.clearCookie('jwt')
     
     return res.status(200).json({
       success: true,
       message: 'Logged out successfully'
     })
+  })
+
+
+  // TODO: Implement refresh token functionality
+  static refresh = catchAsync(async (req: Request, res: Response) => {
+    const token = req.cookies['REFRESH_COOKIE'] as string | undefined
+
+    if (!token) {
+      return res.status(401).json({
+        succes: false,
+        error: { message: 'Unauthorized', code: 'UNAUTHORIZED' }
+      })
+    }
+ 
+    return res.json(req.cookies)
   })
 
   static me = catchAsync(async (req: Request, res: Response) => {

@@ -8,8 +8,11 @@ import productRoutes from './routes/products.routes'
 import authRoutes from './routes/auth.routes'
 import cartRoutes from './routes/cart.routes'
 import { errorHandler } from './middlewares/errorHandler'
+import { AppError } from './utils'
+import cookieParser from 'cookie-parser'
 
 const app = express()
+app.use(cookieParser())
 app.use(cors())
 app.use(express.json())
 app.use(morgan('dev'))
@@ -24,6 +27,10 @@ app.use('/api', authRoutes)
 app.use('/api', userRoutes)
 app.use('/api', productRoutes)
 app.use('/api', cartRoutes)
+
+app.use((req, _res, next) => {
+  next(new AppError(`Route ${req.method} ${req.path} not found`, 404, 'ROUTE_NOT_FOUND'))
+})
 
 app.use(errorHandler)
 

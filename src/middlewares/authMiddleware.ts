@@ -1,12 +1,6 @@
 import { NextFunction, Request, Response} from 'express'
 import { AppError } from '../utils'
-import jwt from 'jsonwebtoken'
-
-interface TokenPayload {
-  id: number
-  email: string
-  role: 'user' | 'admin'
-}
+import { verifyAccessToken } from '../services/token.service'
 
 export const authenticate = (req: Request, _res: Response, next: NextFunction): void => {
   const header = req.headers.authorization
@@ -25,8 +19,7 @@ export const authenticate = (req: Request, _res: Response, next: NextFunction): 
   }
 
   try {
-    const payload = jwt.verify(token, secret) as TokenPayload
-    req.user = {id: payload.id, email: payload.email, role: payload.role}
+    req.user = verifyAccessToken(token)
     next()
   } catch {
     next(new AppError('Invalid token', 401))
@@ -46,4 +39,24 @@ export const authorize = (...roles: Array<'user' | 'admin'>) => {
     }
     next()
   }
+}
+
+export const requireSelfOrAdmin = (req: Request, _res: Response, next: NextFunction): void => {
+  if (!req.user) {
+    next(new AppError('Unauthorized', 401))
+    return
+  }
+
+  const targetId = Number(req.params.id)
+
+  if (!Number.isInteger(targetId)) {
+    next(new AppError('Invalid id', 400))
+    return
+  }
+
+  if (req.user.role !== 'admin' && req.user.id !== targetId) {
+    next(new AppError('Forbidden', 403))
+    return
+  }
+  next()
 }
