@@ -1,11 +1,16 @@
 import { ErrorRequestHandler, NextFunction, Request, Response } from 'express'
-import { AppError } from '../utils'
+import { AppError, isBodyParserError } from '../utils'
 
-export const errorHandler: ErrorRequestHandler = (err: Error, _req: Request, res: Response, _next: NextFunction) => {
+const isProduction = process.env.NODE_ENV === 'production'
+
+export const errorHandler: ErrorRequestHandler = (err: Error, req: Request, res: Response, next: NextFunction) => {
+  if (res.headersSent) {
+    return next(err)
+  }
+
   if (err instanceof AppError) {
     res.status(err.status || 500).json({
       success: false,
-      status: err.status,
       error: {
         message: err.message || 'Internal Server Error',
         code: err.code,
@@ -15,9 +20,26 @@ export const errorHandler: ErrorRequestHandler = (err: Error, _req: Request, res
     return
   }
 
+  if (isBodyParserError(err) && err.type === 'entity.parse.failed') {
+    res.status(400).json({
+      success: false,
+      error: {
+        message: 'Malformed JSON in request body',
+        code: 'INVALID_JSON'
+      }
+    })
+    return
+  }
+
+  console.error(`[${req.method}] ${req.originalUrl}`, err)
+
   res.status(500).json({
     success: false,
-    message: 'Internal server error',
-    error: err.message
+    error: {
+      message: 'Internal server error',
+      code: 'INTERNAL_ERROR',
+      // Solo en desarrollo, nunca en produccion
+      ...(!isProduction && { stack: err.stack })
+    }
   })
 }
