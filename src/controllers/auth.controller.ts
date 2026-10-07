@@ -52,7 +52,7 @@ export class AuthController {
 
     if (!token) {
       return res.status(401).json({
-        succes: false,
+        success: false,
         error: { message: 'Unauthorized', code: 'UNAUTHORIZED' }
       })
     }
