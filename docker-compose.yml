@@ -28,6 +28,9 @@ services:
       DB_PORT: ${DB_PORT}
       PORT: ${PORT}
       JWT_SECRET: ${JWT_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      NODE_ENV: ${NODE_ENV}
+      FRONTEND_ORIGIN: ${FRONTEND_ORIGIN}
       CHOKIDAR_USEPOLLING: true
     ports:
       - "${PORT}:3000"
