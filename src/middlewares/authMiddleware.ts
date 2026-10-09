@@ -1,40 +1,29 @@
 import { NextFunction, Request, Response} from 'express'
 import { AppError } from '../utils'
 import { verifyAccessToken } from '../services/token.service'
+import { ACCESS_COOKIE } from '../config/cookies'
 
 export const authenticate = (req: Request, _res: Response, next: NextFunction): void => {
-  const header = req.headers.authorization
+  const token = req.cookies?.[ACCESS_COOKIE]
 
-  if(!header?.startsWith('Bearer ')) {
-    next(new AppError('Unauthorized', 401))
+  if(!token) {
+    next(new AppError('Unauthorized', 401, 'UNAUTHORIZED'))
     return
   }
-
-  const token = header.slice(7)
-  const secret = process.env.JWT_SECRET
   
-  if(!secret){
-    next(new AppError('JWT_SECRET is not defined', 500))
-    return
-  }
-
-  try {
-    req.user = verifyAccessToken(token)
-    next()
-  } catch {
-    next(new AppError('Invalid token', 401))
-  }
+  req.user = verifyAccessToken(token)
+  next()
 }
 
 export const authorize = (...roles: Array<'user' | 'admin'>) => {
   return (req: Request, _res: Response, next: NextFunction): void => {
     if (!req.user) {
-      next(new AppError('Unauthorized', 401))
+      next(new AppError('Unauthorized', 401, 'UNAUTHORIZED'))
       return
     }
 
     if (!roles.includes(req.user.role)) {
-      next(new AppError('Forbidden', 403))
+      next(new AppError('Forbidden', 403, 'FORBIDDEN'))
       return
     }
     next()
@@ -43,7 +32,7 @@ export const authorize = (...roles: Array<'user' | 'admin'>) => {
 
 export const requireSelfOrAdmin = (req: Request, _res: Response, next: NextFunction): void => {
   if (!req.user) {
-    next(new AppError('Unauthorized', 401))
+    next(new AppError('Unauthorized', 401, 'UNAUTHORIZED'))
     return
   }
 
@@ -55,7 +44,7 @@ export const requireSelfOrAdmin = (req: Request, _res: Response, next: NextFunct
   }
 
   if (req.user.role !== 'admin' && req.user.id !== targetId) {
-    next(new AppError('Forbidden', 403))
+    next(new AppError('Forbidden', 403, 'FORBIDDEN'))
     return
   }
   next()
