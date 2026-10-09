@@ -1,20 +1,13 @@
-import 'dotenv/config'
 import { Sequelize } from 'sequelize'
-
-console.log('Connecting to database:', {
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT,
-  database: process.env.DB_NAME,
-  user: process.env.DB_USER
-})
+import { env } from './env'
 
 const sequelize = new Sequelize(
-  process.env.DB_NAME as string,
-  process.env.DB_USER as string,
-  process.env.DB_PASSWORD as string,
+  env.DB_NAME,
+  env.DB_USER,
+  env.DB_PASSWORD,
   {
-    host: process.env.DB_HOST,
-    port: parseInt(process.env.DB_PORT || '5432'),
+    host: env.DB_HOST,
+    port: env.DB_PORT,
     dialect: 'postgres',
     logging: false
   }
