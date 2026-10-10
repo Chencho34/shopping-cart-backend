@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken'
+import { env } from '../config/env'
 import { AppError } from '../utils'
 
 export interface AccessTokenPayload {
@@ -7,28 +8,33 @@ export interface AccessTokenPayload {
   role: 'user' | 'admin'
 }
 
-function getEnvOrThrow (key: string): string {
-  const value = process.env[key]
-  if (!value) throw new AppError(`${key} is not defined`, 500)
-  return value
+export interface RefreshTokenPayload {
+  id: number,
+  tokenId: string
 }
 
-const JWT_SECRET = getEnvOrThrow('JWT_SECRET')
-const JWT_REFRESH_SECRET = getEnvOrThrow('JWT_REFRESH_SECRET')
-
-
 export function generateAccessToken (payload: AccessTokenPayload): string {
-  return jwt.sign(payload, JWT_SECRET, {
-    algorithm: 'HS256',  //! PENDIENTE
-    expiresIn: '15m'
-  })  
+  return jwt.sign(
+    { id: payload.id, email: payload.email, role: payload.role},
+    env.JWT_SECRET,
+    { algorithm: 'HS256', expiresIn: '15m' }
+  )  
 }
 
 export function verifyAccessToken (token: string): AccessTokenPayload {
-  const decoded = jwt.verify(token, JWT_SECRET, {algorithms: ['HS256']}) //! PENDIENTE
+  let decoded: string | jwt.JwtPayload
+
+  try {
+    decoded = jwt.verify(token, env.JWT_SECRET, { algorithms: ['HS256']})
+  } catch (error) {
+    if (error instanceof jwt.TokenExpiredError) {
+      throw new AppError('Token expired', 401, 'TOKEN_EXPIRED')
+    }
+     throw new AppError('Invalid token', 401, 'INVALID_TOKEN')
+  }
 
   if (typeof decoded === 'string' || decoded.id == null || decoded.email == null || decoded.role == null) {
-    throw new AppError('Invalid Token', 401)
+    throw new AppError('Invalid Token', 401, 'INVALID_TOKEN')
   }
 
   return { 
@@ -38,6 +44,29 @@ export function verifyAccessToken (token: string): AccessTokenPayload {
   }
 }
 
-export function generateRefreshToken (payload: AccessTokenPayload , tokenId: string): string {
-  return jwt.sign({payload, tokenId}, JWT_REFRESH_SECRET, { expiresIn: '7d', algorithm: 'HS256'}) //! PENDIENTE
+export function generateRefreshToken (userId: number, tokenId: string): string {
+  return jwt.sign(
+    { id: userId, tokenId},
+    env.JWT_REFRESH_SECRET,
+    { expiresIn: '7d', algorithm: 'HS256'}
+  )
+}
+
+export function verifyRefreshToken (token: string): RefreshTokenPayload {
+  let decoded: string | jwt.JwtPayload
+
+  try {
+    decoded = jwt.verify(token, env.JWT_REFRESH_SECRET, { algorithms: ['HS256'] })
+  } catch (error) {
+    if (error instanceof jwt.TokenExpiredError) {
+      throw new AppError('Invalid token', 401, 'TOKEN_EXPIRED')
+    }
+    throw new AppError('Invalid token', 401, 'INVALID_TOKEN')
+  }
+
+  if (typeof decoded === 'string' || decoded.id == null || decoded.tokenId == null) {
+    throw new AppError('Invalid refresh token', 401, 'INVALID_TOKEN')
+  }
+
+  return { id: decoded.id, tokenId: decoded.tokenId }
 }
